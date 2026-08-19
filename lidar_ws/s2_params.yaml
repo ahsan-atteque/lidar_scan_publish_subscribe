@@ -1,0 +1,37 @@
+# RPLIDAR S2 driver parameters.
+# Load with:  ros2 run rplidar_s2_driver s2_node --ros-args --params-file <this>
+/**:
+  ros__parameters:
+    # Prefer the udev symlink over /dev/ttyUSB0 -- the numbered node shifts
+    # between reboots and replugs, especially with a RealSense also attached.
+    serial_port: "/dev/rplidar"
+
+    # The S2 runs at 1 Mbaud. The A1/A2 run at 115200/256000. Getting this
+    # wrong produces a device that idles both UART lines at a healthy 3.3 V
+    # and answers nothing -- indistinguishable from dead hardware.
+    serial_baudrate: 1000000
+
+    frame_id: "laser"
+    topic: "scan"
+
+    # S2 specification range. Reporting the A1's 12 m here would make Nav2
+    # treat genuine 20 m returns as invalid.
+    range_min: 0.05
+    range_max: 30.0
+
+    # Set true if the unit is mounted upside down.
+    inverted: false
+
+    # Bin samples into a uniform angular array. LaserScan assumes constant
+    # angular spacing; the S2 does not deliver it. Disable for lower CPU at
+    # the cost of slightly bowed walls in the map.
+    angle_compensate: true
+
+    # Bin count for angle compensation. The S2 produces roughly 1600 samples
+    # per revolution at 10 Hz; matching that avoids both empty bins and
+    # discarded measurements.
+    samples_per_scan: 1600
+
+    # Reject returns below this signal strength (0-63). Raise to ~10 if
+    # reflective surfaces or direct sunlight are producing phantom points.
+    min_quality: 0
